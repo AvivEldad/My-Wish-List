@@ -22,8 +22,10 @@ const itemSchema = new mongoose.Schema({
     type: Number,
   },
   itemLink: {
-    type: mongoose.SchemaTypes.Url,
-    trim: true,
+    type: String,
+    validator: function (val) {
+      return val.match(/^(https?|ftp):\/\/[^\s\/$.?#].[^\s]*$/);
+    },
   },
   description: {
     type: String,
