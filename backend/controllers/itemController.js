@@ -1,4 +1,7 @@
 const Item = require("../models/itemModel");
+const APIFeatures = require("../Utils/APIFeatures");
+
+const apiFeatures = new APIFeatures();
 
 exports.getAllItems = async (req, res) => {
   try {
@@ -18,9 +21,7 @@ exports.getAllItems = async (req, res) => {
 };
 exports.getItem = async (req, res) => {
   try {
-    const id = req.params.itemId * 1;
-
-    const item = await Item.findOne({ id: `${id}` });
+    const item = await Item.findById(req.params.itemId);
     res.status(200).json({
       status: "success",
       data: {
@@ -36,7 +37,10 @@ exports.getItem = async (req, res) => {
 };
 exports.addItem = async (req, res) => {
   try {
-    //TODO - need to add here a search for the item image
+    const name = req.body.name;
+    const [avg, pic] = await apiFeatures.getItemInfo(name);
+    req.body.image = pic;
+    req.body.approximatedPrice = avg;
     const newItem = await Item.create(req.body);
 
     res.status(201).json({
