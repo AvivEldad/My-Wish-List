@@ -9,14 +9,9 @@ const itemSchema = new mongoose.Schema({
     maxlength: [40, "An item name must have less or equal then 15 characters"],
     minlength: [3, "An item name must have more or equal then 3 characters"],
   },
-  rating: {
-    type: Number,
-    default: 3,
-    min: [1, "Rating must be above 1.0"],
-    max: [5, "Rating must be below 5.0"],
-  },
   budget: {
     type: Number,
+    default: 0,
   },
   approximatedPrice: {
     type: Number,
@@ -46,6 +41,24 @@ const itemSchema = new mongoose.Schema({
     enum: ["active", "pending", "archived"],
     default: "active",
   },
+  rank: {
+    type: Number,
+    min: 1,
+  },
+});
+
+itemSchema.pre("save", async function (next) {
+  if (!this.rank) {
+    try {
+      const listLength = await this.constructor.countDocuments();
+
+      this.rank = listLength + 1;
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  next();
 });
 
 const Item = mongoose.model("Item", itemSchema);
