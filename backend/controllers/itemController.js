@@ -5,7 +5,7 @@ const apiFeatures = new APIFeatures();
 
 exports.getAllItems = async (req, res) => {
   try {
-    const items = await Item.find();
+    const items = await Item.find().sort({ rank: 1 });
 
     res.status(200).json({
       status: "success",
@@ -58,15 +58,39 @@ exports.addItem = async (req, res) => {
 };
 exports.updateItem = async (req, res) => {
   try {
-    const item = await Item.findByIdAndUpdate(req.params.itemId, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const itemId = req.params.itemId;
+    const { rank: newRank, ...updateData } = req.body;
+
+    const currentItem = await Item.findById(itemId);
+    if (!currentItem) {
+      return res.status(404).json({
+        status: "fail",
+        message: err,
+      });
+    }
+    const currentRank = currentItem.rank;
+    if (newRank !== undefined && newRank !== currentRank) {
+      const incAmount = newRank < currentRank ? 1 : -1;
+      const query = {
+        rank: {
+          $gte: Math.min(newRank, currentRank),
+          $lte: Math.max(newRank, currentRank),
+        },
+      };
+
+      await Item.updateMany(query, { $inc: { rank: incAmount } });
+    }
+
+    const updatedItem = await Item.findByIdAndUpdate(
+      itemId,
+      newRank !== undefined ? { ...updateData, rank: newRank } : updateData,
+      { new: true, runValidators: true }
+    );
 
     res.status(200).json({
       status: "success",
       data: {
-        item,
+        updatedItem,
       },
     });
   } catch (err) {
