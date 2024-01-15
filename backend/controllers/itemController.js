@@ -5,7 +5,7 @@ const apiFeatures = new APIFeatures();
 
 exports.getAllItems = async (req, res) => {
   try {
-    const items = await Item.find().sort({ rank: 1 });
+    const items = await Item.find().sort({ rank: 1, createdAt: -1 });
 
     res.status(200).json({
       status: "success",
