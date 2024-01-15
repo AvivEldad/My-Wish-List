@@ -1,6 +1,6 @@
 const express = require("express");
 const itemController = require("../controllers/itemController");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 router.route("/").get(itemController.getAllItems).post(itemController.addItem);
 
