@@ -6,7 +6,7 @@ const itemSchema = new mongoose.Schema({
     required: [true, "An item must have a name"],
     unique: true,
     trim: true,
-    maxlength: [20, "An item name must have less or equal then 20 characters"],
+    maxlength: [30, "An item name must have less or equal then 30 characters"],
     minlength: [3, "An item name must have more or equal then 3 characters"],
   },
   budget: {
