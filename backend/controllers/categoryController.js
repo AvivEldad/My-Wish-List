@@ -1,4 +1,5 @@
 const Category = require("../models/categoryModel");
+const Item = require("../models/itemModel");
 
 exports.getAllCategories = async (req, res) => {
   try {
@@ -11,7 +12,6 @@ exports.getAllCategories = async (req, res) => {
       }
       return a.name.localeCompare(b.name);
     });
-    console.log(sortedCategories);
 
     res.status(200).json({
       status: "success",
@@ -21,31 +21,25 @@ exports.getAllCategories = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: "fail",
-      message: err,
+      message: err.message,
     });
   }
 };
 exports.getCategory = async (req, res) => {
-  //
-  //
-  //
-  //get category and all the items
-  //
-  //
-  //   try {
-  //     const item = await Item.findById(req.params.itemId);
-  //     res.status(200).json({
-  //       status: "success",
-  //       data: {
-  //         item,
-  //       },
-  //     });
-  //   } catch (err) {
-  //     res.status(404).json({
-  //       status: "fail",
-  //       message: err,
-  //     });
-  //   }
+  try {
+    const category = await Category.findById(req.params.categoryId);
+    res.status(200).json({
+      status: "success",
+      data: {
+        category,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
 exports.addCategory = async (req, res) => {
   try {
@@ -59,7 +53,7 @@ exports.addCategory = async (req, res) => {
   } catch (err) {
     res.status(400).json({
       status: "fail",
-      message: err,
+      message: err.message,
     });
   }
 };
@@ -83,26 +77,22 @@ exports.updateCategory = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: "fail",
-      message: err,
+      message: err.message,
     });
   }
 };
 exports.deleteCategory = async (req, res) => {
-  //
-  //
-  //need to move all the items to general category
-  //
-  //
-  //   try {
-  //     await Item.findByIdAndDelete(req.params.itemId);
-  //     res.status(204).json({
-  //       status: "success",
-  //       data: null,
-  //     });
-  //   } catch (err) {
-  //     res.status(404).json({
-  //       status: "fail",
-  //       message: err,
-  //     });
-  //   }
+  try {
+    await Item.deleteMany({ category: req.params.categoryId });
+    await Category.findByIdAndDelete(req.params.categoryId);
+    res.status(204).json({
+      status: "success",
+      data: null,
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
 };
