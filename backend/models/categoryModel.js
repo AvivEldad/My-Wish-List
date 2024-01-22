@@ -26,7 +26,10 @@ const categorySchema = new mongoose.Schema({
 });
 
 categorySchema.pre("save", function (next) {
-  this.name.charAt(0).toUpperCase() + this.name.slice(1);
+  this.name = this.name
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
   next();
 });
 
