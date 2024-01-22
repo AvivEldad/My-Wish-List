@@ -1,18 +1,26 @@
 const express = require("express");
 const categoryController = require("../controllers/categoryController");
 const router = express.Router();
+const { body, param } = require("express-validator");
 const items = require("./itemRoutes");
 
 router
   .route("/")
   .get(categoryController.getAllCategories)
-  .post(categoryController.addCategory);
+  .post(
+    body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
+    categoryController.addCategory
+  );
 
 router
   .route("/:categoryId")
-  .get(categoryController.getCategory)
-  .patch(categoryController.updateCategory)
-  .delete(categoryController.deleteCategory);
+  .get(
+    param("categoryId").isMongoId(),
+    body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
+    categoryController.getCategory
+  )
+  .patch(param("categoryId").isMongoId(), categoryController.updateCategory)
+  .delete(param("categoryId").isMongoId(), categoryController.deleteCategory);
 
 router.use("/:categoryId/items", items);
 
