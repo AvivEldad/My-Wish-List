@@ -1,6 +1,6 @@
 const Item = require("../models/itemModel");
 const Category = require("../models/categoryModel");
-const mongoose = require("mongoose");
+const { validationResult } = require("express-validator");
 const APIFeatures = require("../Utils/APIFeatures");
 
 const apiFeatures = new APIFeatures();
@@ -24,7 +24,14 @@ exports.getAllItems = async (req, res) => {
 
 exports.getItem = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const item = await Item.findById(req.params.itemId);
+    if (!item) {
+      throw new Error("There is no such item");
+    }
     res.status(200).json({
       status: "success",
       data: {
@@ -41,6 +48,10 @@ exports.getItem = async (req, res) => {
 
 exports.addItem = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const name = req.body.name;
     const [avg, pic] = await apiFeatures.getItemInfo(name);
     req.body.image = pic;
@@ -68,15 +79,16 @@ exports.addItem = async (req, res) => {
 
 exports.updateItem = async (req, res) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     const itemId = req.params.itemId;
     const { rank: newRank, category: newCategoryId, ...updateData } = req.body;
 
     const currentItem = await Item.findById(itemId);
     if (!currentItem) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Item not found",
-      });
+      throw new Error("There is no such item");
     }
 
     const currentRank = currentItem.rank;
@@ -143,8 +155,14 @@ exports.updateItem = async (req, res) => {
 
 exports.deleteItem = async (req, res) => {
   try {
-    await Item.findByIdAndDelete(req.params.itemId);
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const item = await Item.findByIdAndDelete(req.params.itemId);
+    if (!item) {
+      throw new Error("There is no such item");
+    }
     res.status(204).json({
       status: "success",
       data: null,
