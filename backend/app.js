@@ -1,6 +1,7 @@
 const express = require("express");
 const categoryRouter = require("./routes/categoryRoutes");
 const userRouter = require("./routes/userRoutes");
+const AppError = require("./utils/appError");
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/users", userRouter);
 
 app.all("*", (req, res, next) => {
-  next(new Error(`Can't find ${req.originalUrl} on this server!`, 404));
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 module.exports = app;
