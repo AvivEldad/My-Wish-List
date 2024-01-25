@@ -3,10 +3,11 @@ const categoryController = require("../controllers/categoryController");
 const router = express.Router();
 const { body, param } = require("express-validator");
 const items = require("./itemRoutes");
+const authController = require("../controllers/authController");
 
 router
   .route("/")
-  .get(categoryController.getAllCategories)
+  .get(authController.protect, categoryController.getAllCategories)
   .post(
     body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
     categoryController.addCategory
