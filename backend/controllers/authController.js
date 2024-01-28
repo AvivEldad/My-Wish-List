@@ -92,3 +92,33 @@ exports.protect = async (req, res, next) => {
     });
   }
 };
+
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You do not have permission to do this operation", 403)
+      );
+    }
+    next();
+  };
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return next(new AppError("User was not found", 404));
+    }
+
+    const resetToken = User.createPasswordResetToken();
+    await user.save({ validateBeforeSave: false });
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
+    });
+  }
+};
+
+exports.resetPassword = (req, res, next) => {};
