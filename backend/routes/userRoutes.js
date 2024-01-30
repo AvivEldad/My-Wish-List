@@ -10,9 +10,7 @@ router.route("/login").post(body("email").isEmail(), authController.login);
 router
   .route("/forgotPassword")
   .post(body("email").isEmail(), authController.forgotPassword);
-router
-  .route("/resetPassword")
-  .post(body("email").isEmail(), authController.resetPassword);
+router.route("/resetPassword/:token").patch(authController.resetPassword);
 
 router
   .route("/")
