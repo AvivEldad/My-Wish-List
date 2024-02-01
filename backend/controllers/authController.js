@@ -11,6 +11,16 @@ const signToken = (id) => {
   });
 };
 
+const createAndSendToken = (user, statusCode, res) => {
+  const token = signToken(user._id);
+
+  res.status(statusCode).json({
+    status: "success",
+    token,
+    data: { user },
+  });
+};
+
 exports.signup = async (req, res, next) => {
   try {
     const newUser = await User.create({
@@ -19,14 +29,7 @@ exports.signup = async (req, res, next) => {
       password: req.body.password,
       confirmPassword: req.body.confirmPassword,
     });
-
-    const token = signToken(newUser._id);
-
-    res.status(201).json({
-      status: "success",
-      token,
-      data: { newUser },
-    });
+    createAndSendToken(newUser, 201, res);
   } catch (err) {
     res.status(404).json({
       status: "fail",
@@ -48,11 +51,7 @@ exports.login = async (req, res, next) => {
       return next(new AppError("Incorrect email or password!", 401));
     }
 
-    const token = signToken(user._id);
-    res.status(200).json({
-      status: "success",
-      token,
-    });
+    createAndSendToken(user, 200, res);
   } catch (err) {
     res.status(404).json({
       status: "fail",
@@ -173,11 +172,30 @@ exports.resetPassword = async (req, res, next) => {
     user.passwordResetExpires = undefined;
     await user.save();
 
-    const token = signToken(user._id);
-    res.status(200).json({
-      status: "success",
-      token,
+    createAndSendToken(user, 200, res);
+  } catch (err) {
+    res.status(404).json({
+      status: "fail",
+      message: err.message,
     });
+  }
+};
+
+exports.updatePassword = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select("+password");
+    if (!user) {
+      return next(new AppError("User does not exist", 400));
+    }
+
+    if (!(await user.correctPassword(req.body.password, user.password))) {
+      return next(new AppError("Your current password is wrong", 401));
+    }
+
+    user.password = req.body.password;
+    user.confirmPassword = req.body.password;
+    await user.save();
+    createAndSendToken(user, 200, res);
   } catch (err) {
     res.status(404).json({
       status: "fail",

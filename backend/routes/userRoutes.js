@@ -4,13 +4,20 @@ const authController = require("../controllers/authController");
 const router = express.Router();
 const { body, param } = require("express-validator");
 
-router.route("/signup").post(authController.signup);
-router.route("/login").post(body("email").isEmail(), authController.login);
+router.post("/signup", authController.signup);
+router.post("/login", body("email").isEmail(), authController.login);
 
-router
-  .route("/forgotPassword")
-  .post(body("email").isEmail(), authController.forgotPassword);
-router.route("/resetPassword/:token").patch(authController.resetPassword);
+router.post(
+  "/forgotPassword",
+  body("email").isEmail(),
+  authController.forgotPassword
+);
+router.patch("/resetPassword/:token", authController.resetPassword);
+router.patch(
+  "/updateMyPassword",
+  authController.protect,
+  authController.updatePassword
+);
 
 router
   .route("/")
