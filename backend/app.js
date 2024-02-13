@@ -2,9 +2,12 @@ const express = require("express");
 const categoryRouter = require("./routes/categoryRoutes");
 const userRouter = require("./routes/userRoutes");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 const AppError = require("./utils/appError");
 
 const app = express();
+
+app.use(helmet());
 
 const limiter = rateLimit({
   max: 100,
@@ -14,7 +17,7 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
