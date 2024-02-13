@@ -1,9 +1,18 @@
 const express = require("express");
 const categoryRouter = require("./routes/categoryRoutes");
 const userRouter = require("./routes/userRoutes");
+const rateLimit = require("express-rate-limit");
 const AppError = require("./utils/appError");
 
 const app = express();
+
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 10000,
+  message: "Too many request from this IP, please try again later",
+});
+
+app.use("/api", limiter);
 
 app.use(express.json());
 
