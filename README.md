@@ -12,6 +12,7 @@ The Wishlist App is a simple application for users to create and manage wish lis
 
 
 **Prerequisites**
+
 Node.js installed
 MongoDB database
 
