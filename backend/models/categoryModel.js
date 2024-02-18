@@ -25,6 +25,14 @@ const categorySchema = new mongoose.Schema({
   ],
 });
 
+categorySchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "items",
+    select: "-_v",
+  });
+  next();
+});
+
 categorySchema.pre("save", function (next) {
   this.name = this.name
     .split(" ")
