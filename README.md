@@ -23,7 +23,7 @@ MongoDB database
 3. Install dependencies with npm
 4. Set up your environment variables (NODE_ENV,PORT,DATABASE,SEARCH_API_KEY, JWT_SECRET,JWT_EXPIRES_IN,JWT_COOKIE_EXPIRES_IN,EMAIL_USERNAME,EMAIL_PASSWORD,EMAIL_HOST,EMAIL_PORT)
 
-To run the api run the command npm start. The app will be accessible at http://localhost:PORT
+To run the api run the command npm start. The app will be accessible at your local host
 
 
 **The api will be deployed in the future and will have a docker file**
