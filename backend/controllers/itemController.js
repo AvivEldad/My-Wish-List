@@ -2,6 +2,7 @@ const Item = require("../models/itemModel");
 const Category = require("../models/categoryModel");
 const { validationResult } = require("express-validator");
 const APIFeatures = require("../Utils/APIFeatures");
+const factory = require("./handlerFactory");
 
 const apiFeatures = new APIFeatures();
 
@@ -153,24 +154,4 @@ exports.updateItem = async (req, res) => {
   }
 };
 
-exports.deleteItem = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const item = await Item.findByIdAndDelete(req.params.itemId);
-    if (!item) {
-      throw new Error("There is no such item");
-    }
-    res.status(204).json({
-      status: "success",
-      data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+exports.deleteItem = factory.deleteOne(Item);
