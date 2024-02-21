@@ -6,46 +6,9 @@ const factory = require("./handlerFactory");
 
 const apiFeatures = new APIFeatures();
 
-exports.getAllItems = async (req, res) => {
-  try {
-    const items = await Item.find().sort({ rank: 1, createdAt: -1 });
+exports.getAllItems = factory.getAll(Item, { rank: 1, createdAt: -1 });
 
-    res.status(200).json({
-      status: "success",
-      results: items.length,
-      data: { items },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
-
-exports.getItem = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    const item = await Item.findById(req.params.itemId);
-    if (!item) {
-      throw new Error("There is no such item");
-    }
-    res.status(200).json({
-      status: "success",
-      data: {
-        item,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+exports.getItem = factory.getOne(Item);
 
 exports.addItem = async (req, res) => {
   try {
