@@ -5,9 +5,11 @@ const { body, param } = require("express-validator");
 const items = require("./itemRoutes");
 const authController = require("../controllers/authController");
 
+router.use(authController.protect);
+
 router
   .route("/")
-  .get(authController.protect, categoryController.getAllCategories)
+  .get(categoryController.getAllCategories)
   .post(
     body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
     categoryController.addCategory
@@ -18,10 +20,19 @@ router
   .get(
     param("categoryId").isMongoId(),
     body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
+
     categoryController.getCategory
   )
-  .patch(param("categoryId").isMongoId(), categoryController.updateCategory)
-  .delete(param("categoryId").isMongoId(), categoryController.deleteCategory);
+  .patch(
+    param("categoryId").isMongoId(),
+
+    categoryController.updateCategory
+  )
+  .delete(
+    param("categoryId").isMongoId(),
+
+    categoryController.deleteCategory
+  );
 
 router.use("/:categoryId/items", items);
 

@@ -4,6 +4,8 @@ const authController = require("../controllers/authController");
 const router = express.Router();
 const { body, param } = require("express-validator");
 
+router.use(authController.protect);
+
 router.post("/signup", authController.signup);
 router.post("/login", body("email").isEmail(), authController.login);
 
@@ -13,42 +15,35 @@ router.post(
   authController.forgotPassword
 );
 router.patch("/resetPassword/:token", authController.resetPassword);
-router.patch(
-  "/updateMyPassword",
-  authController.protect,
-  authController.updatePassword
-);
+router.patch("/updateMyPassword", authController.updatePassword);
 
-router.get(
-  "/getMe",
-  authController.protect,
-  authController.getMe,
-  authController.getUser
-);
-router.patch("/updateMe", authController.protect, userController.updateMe);
-router.delete("/deleteMe", authController.protect, userController.deleteMe);
+router.get("/getMe", authController.getMe, authController.getUser);
+router.patch("/updateMe", userController.updateMe);
+router.delete("/deleteMe", userController.deleteMe);
 
 router
   .route("/")
   .get(userController.getAllUsers)
-  .post(
-    authController.protect,
-    authController.restrictTo,
-    userController.addUser
-  );
+  .post(authController.restrictTo, userController.addUser);
+
+router.use(authController.restrictTo("admin"));
 
 router
   .route("/:userId")
-  .get(param("userId").isMongoId(), userController.getUser)
+  .get(
+    param("userId").isMongoId(),
+
+    userController.getUser
+  )
   .patch(
     param("userId").isMongoId(),
-    authController.protect,
+
     authController.restrictTo,
     userController.updateUser
   )
   .delete(
     param("userId").isMongoId(),
-    authController.protect,
+
     authController.restrictTo,
     userController.deleteUser
   );
