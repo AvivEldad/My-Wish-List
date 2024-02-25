@@ -52,6 +52,8 @@ const itemSchema = new mongoose.Schema({
   },
 });
 
+itemSchema.index({ rating: 1, createdAt: -1 });
+
 itemSchema.pre("save", async function (next) {
   if (!this.rank) {
     try {
