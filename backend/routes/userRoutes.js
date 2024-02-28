@@ -4,9 +4,8 @@ const authController = require("../controllers/authController");
 const router = express.Router();
 const { body, param } = require("express-validator");
 
-router.use(authController.protect);
-
 router.post("/signup", authController.signup);
+
 router.post("/login", body("email").isEmail(), authController.login);
 
 router.post(
@@ -14,10 +13,13 @@ router.post(
   body("email").isEmail(),
   authController.forgotPassword
 );
+
+router.use(authController.protect);
+
 router.patch("/resetPassword/:token", authController.resetPassword);
 router.patch("/updateMyPassword", authController.updatePassword);
 
-router.get("/getMe", authController.getMe, authController.getUser);
+router.get("/getMe", userController.getMe, userController.getUser);
 router.patch("/updateMe", userController.updateMe);
 router.delete("/deleteMe", userController.deleteMe);
 
@@ -29,20 +31,20 @@ router
 router.use(authController.restrictTo("admin"));
 
 router
-  .route("/:userId")
+  .route("/:id")
   .get(
-    param("userId").isMongoId(),
+    param("id").isMongoId(),
 
     userController.getUser
   )
   .patch(
-    param("userId").isMongoId(),
+    param("id").isMongoId(),
 
     authController.restrictTo,
     userController.updateUser
   )
   .delete(
-    param("userId").isMongoId(),
+    param("id").isMongoId(),
 
     authController.restrictTo,
     userController.deleteUser
