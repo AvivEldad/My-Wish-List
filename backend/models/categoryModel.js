@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./userModel");
 
 const categorySchema = new mongoose.Schema({
   name: {
@@ -23,6 +24,11 @@ const categorySchema = new mongoose.Schema({
       ref: "Item",
     },
   ],
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    index: true,
+  },
 });
 
 categorySchema.pre(/^find/, function (next) {
@@ -39,6 +45,23 @@ categorySchema.pre("save", function (next) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
   next();
+});
+
+categorySchema.pre("save", async function (next) {
+  try {
+    const user = await User.findById(this.user);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    if (!user.categories) user.categories = [];
+    user.categories.push(this._id);
+
+    await user.save();
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 const Category = mongoose.model("Category", categorySchema);
