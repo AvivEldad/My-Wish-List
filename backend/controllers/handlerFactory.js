@@ -6,7 +6,7 @@ exports.deleteOne = (Model) => async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const id = req.params.userId || req.params.itemId || req.params.id;
+    const id = req.params.itemId || req.params.categoryId;
     const doc = await Model.findByIdAndDelete(id);
     if (!doc) {
       throw new Error("There is no such document");
@@ -50,7 +50,7 @@ exports.getOne = (Model) => async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const id = req.params.userId || req.params.itemId || req.params.id;
+    const id = req.params.itemId || req.params.categoryId;
     const doc = await Model.findById(id);
     if (!doc) {
       throw new Error("There is no such document");
@@ -69,11 +69,14 @@ exports.getOne = (Model) => async (req, res) => {
   }
 };
 
-exports.getAll = (Model, firstSort, secondSort) => async (req, res) => {
+exports.getAll = (Model, firstSort, comparisonFn) => async (req, res) => {
   try {
-    let query = Model.find().sort(firstSort);
-    if (secondSort) query = query.sort(secondSort);
+    let query = Model.find({ user: req.user.id }).sort(firstSort);
+
     const doc = await query;
+    if (comparisonFn) {
+      doc.sort(comparisonFn);
+    }
 
     res.status(200).json({
       status: "success",

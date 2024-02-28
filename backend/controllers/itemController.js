@@ -6,7 +6,7 @@ const factory = require("./handlerFactory");
 
 const apiFeatures = new APIFeatures();
 
-exports.getAllItems = factory.getAll(Item, { rank: 1, createdAt: -1 });
+exports.getAllItems = factory.getAll(Item, { rank: 1, createdAt: -1 }, null);
 
 exports.getItem = factory.getOne(Item);
 
