@@ -48,7 +48,13 @@ const itemSchema = new mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Category",
-    required: true,
+    required: [true, "Item must belong to a category."],
+  },
+  user: {
+    type: mongoose.Schema.ObjectId,
+    ref: "User",
+    required: [true, "Item must belong to a user"],
+    index: true,
   },
 });
 
