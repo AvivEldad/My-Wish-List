@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
+const Category = require("./categoryModel");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -43,6 +44,7 @@ const userSchema = new mongoose.Schema({
       },
       message: "The passwords are not the same",
     },
+    select: false,
   },
 
   passwordChangedAt: Date,
@@ -62,6 +64,11 @@ const userSchema = new mongoose.Schema({
     default: Date.now(),
     select: false,
   },
+  categories: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Category",
+    required: true,
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -80,8 +87,31 @@ userSchema.pre("save", function (next) {
   next();
 });
 
+userSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    try {
+      const generalCategory = new Category({
+        name: "General",
+        user: this._id,
+        createdAt: Date.now(),
+      });
+
+      await generalCategory.save();
+      this.categories.push(generalCategory._id);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  next();
+});
+
 userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });
+  this.populate({
+    path: "categories",
+    select: " -createdAt",
+  });
   next();
 });
 
