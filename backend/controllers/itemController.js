@@ -1,5 +1,6 @@
 const Item = require("../models/itemModel");
 const Category = require("../models/categoryModel");
+const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
 const APIFeatures = require("../Utils/APIFeatures");
 const factory = require("./handlerFactory");
@@ -16,6 +17,7 @@ exports.addItem = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    if (!req.body.user) req.body.user = req.user.id;
     const name = req.body.name;
     const [avg, pic] = await apiFeatures.getItemInfo(name);
     req.body.image = pic;
