@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const categoryRouter = require("./routes/categoryRoutes");
 const userRouter = require("./routes/userRoutes");
@@ -9,6 +10,9 @@ const hpp = require("hpp");
 const AppError = require("./utils/appError");
 
 const app = express();
+
+app.set("view engine", "pug");
+app.set("views", path.join(__dirname, "views"));
 
 app.use(helmet());
 
@@ -34,6 +38,10 @@ app.use(
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
+});
+
+app.get("/", (req, res) => {
+  res.status(200).render("base");
 });
 
 //Routes
