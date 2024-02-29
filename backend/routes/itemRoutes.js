@@ -8,9 +8,6 @@ router
   .get(itemController.getAllItems)
   .post(
     body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
-    body("budget").isNumeric(),
-    body("itemLink").isURL(),
-    body("description").isAlphanumeric("en-US", { ignore: " -.,:'" }),
     itemController.addItem
   );
 

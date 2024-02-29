@@ -19,7 +19,6 @@ router
   .route("/:categoryId")
   .get(
     param("categoryId").isMongoId(),
-    body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
 
     categoryController.getCategory
   )
