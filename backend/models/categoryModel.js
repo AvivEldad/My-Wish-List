@@ -18,6 +18,10 @@ const categorySchema = new mongoose.Schema({
     default: Date.now(),
     select: false,
   },
+  itemsQuantity: {
+    type: Number,
+    default: 0,
+  },
   items: [
     {
       type: mongoose.Schema.Types.ObjectId,

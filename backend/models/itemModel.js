@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Category = require("../models/categoryModel");
 
 const itemSchema = new mongoose.Schema({
   name: {
@@ -81,6 +82,30 @@ itemSchema.pre("save", function (next) {
     .join(" ");
   next();
 });
+
+itemSchema.statics.calcItemsQuantity = async function (categoryId) {
+  const stats = await this.aggregate([
+    {
+      $match: { category: categoryId },
+    },
+    {
+      $group: {
+        _id: "$category",
+        nItems: { $sum: 1 },
+      },
+    },
+  ]);
+
+  if (stats.length > 0) {
+    await Category.findByIdAndUpdate(categoryId, {
+      itemsQuantity: stats[0].nItems,
+    });
+  } else {
+    await Category.findByIdAndUpdate(categoryId, {
+      itemsQuantity: 0,
+    });
+  }
+};
 
 const Item = mongoose.model("Item", itemSchema);
 
