@@ -1,7 +1,8 @@
 const { validationResult } = require("express-validator");
+const catchAsync = require("./../Utils/catchAsync");
 
-exports.deleteOne = (Model) => async (req, res) => {
-  try {
+exports.deleteOne = (Model) =>
+  catchAsync(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -15,16 +16,10 @@ exports.deleteOne = (Model) => async (req, res) => {
       status: "success",
       data: null,
     });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  });
 
-exports.createOne = (Model) => async (req, res) => {
-  try {
+exports.createOne = (Model) =>
+  catchAsync(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -36,16 +31,10 @@ exports.createOne = (Model) => async (req, res) => {
         data: newDoc,
       },
     });
-  } catch (err) {
-    res.status(400).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  });
 
-exports.getOne = (Model) => async (req, res) => {
-  try {
+exports.getOne = (Model) =>
+  catchAsync(async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -61,16 +50,10 @@ exports.getOne = (Model) => async (req, res) => {
         data: doc,
       },
     });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  });
 
-exports.getAll = (Model, firstSort, comparisonFn) => async (req, res) => {
-  try {
+exports.getAll = (Model, firstSort, comparisonFn) =>
+  catchAsync(async (req, res, next) => {
     let query = Model.find({ user: req.user.id }).sort(firstSort);
 
     const doc = await query;
@@ -83,10 +66,4 @@ exports.getAll = (Model, firstSort, comparisonFn) => async (req, res) => {
       results: doc.length,
       data: { doc },
     });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  });

@@ -2,6 +2,7 @@ const Category = require("../models/categoryModel");
 const Item = require("../models/itemModel");
 const { validationResult } = require("express-validator");
 const factory = require("./handlerFactory");
+const catchAsync = require("./../Utils/catchAsync");
 
 function categoryComparison(a, b) {
   if (a.name === "General") {
@@ -21,56 +22,43 @@ exports.getAllCategories = factory.getAll(
 exports.getCategory = factory.getOne(Category);
 exports.addCategory = factory.createOne(Category);
 
-exports.updateCategory = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+exports.updateCategory = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const category = await Category.findByIdAndUpdate(
+    req.params.categoryId,
+    req.body,
+    {
+      new: true,
+      runValidators: true,
     }
-    const category = await Category.findByIdAndUpdate(
-      req.params.categoryId,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-    if (!category) {
-      throw new Error("There is no such category");
-    }
+  );
+  if (!category) {
+    throw new Error("There is no such category");
+  }
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        category,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
+  res.status(200).json({
+    status: "success",
+    data: {
+      category,
+    },
+  });
+});
+
+exports.deleteCategory = catchAsync(async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
   }
-};
-exports.deleteCategory = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    await Item.deleteMany({ category: req.params.categoryId });
-    const category = await Category.findByIdAndDelete(req.params.categoryId);
-    if (!category) {
-      throw new Error("There is no such category");
-    }
-    res.status(204).json({
-      status: "success",
-      data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
+  await Item.deleteMany({ category: req.params.categoryId });
+  const category = await Category.findByIdAndDelete(req.params.categoryId);
+  if (!category) {
+    throw new Error("There is no such category");
   }
-};
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});

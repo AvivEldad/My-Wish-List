@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const AppError = require("./../Utils/appError");
 const factory = require("./handlerFactory");
+const catchAsync = require("./../Utils/catchAsync");
 
 const filteredBody = (obj, ...allowedFields) => {
   const newObj = {};
@@ -29,52 +30,34 @@ exports.updateUser = (req, res) => {
 };
 exports.deleteUser = factory.deleteOne(User);
 
-exports.updateMe = async (req, res, next) => {
+exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.confirmPassword) {
     return next(new AppError("This route is not for password update", 400));
   }
-  try {
-    const filteredBody = filterObj(req, bod, "name", "email");
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      filteredBody,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+  const filteredBody = filterObj(req, bod, "name", "email");
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
 
-    res.status(200).json({
-      status: "success",
-      data: {
-        user: updatedUser,
-      },
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  res.status(200).json({
+    status: "success",
+    data: {
+      user: updatedUser,
+    },
+  });
+});
 
-exports.deleteMe = async (req, res, next) => {
-  try {
-    const updatedUser = await User.findByIdAndUpdate(req.user.id, {
-      active: false,
-    });
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, {
+    active: false,
+  });
 
-    res.status(204).json({
-      status: "success",
-      data: null,
-    });
-  } catch (err) {
-    res.status(404).json({
-      status: "fail",
-      message: err.message,
-    });
-  }
-};
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
 
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
