@@ -5,8 +5,35 @@ const { validationResult } = require("express-validator");
 const APIFeatures = require("../Utils/APIFeatures");
 const factory = require("./handlerFactory");
 const catchAsync = require("./../Utils/catchAsync");
+const multer = require("multer");
+const AppError = require("../Utils/appError");
 
 const apiFeatures = new APIFeatures();
+
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/img/items");
+  },
+  filename: (req, file, cb) => {
+    const extension = file.minetype.split("/")[1];
+    cb(null, `item-${req.user.id}-${Date.now()}.${extension}`);
+  },
+});
+
+const multerFilter = (req, file, cb) => {
+  if (file.minetype.startWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("Not an image! Please upload only images", 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadItemPhoto = upload.single("photo");
 
 exports.getAllItems = factory.getAll(Item, { rank: 1, createdAt: -1 }, null);
 
@@ -20,7 +47,7 @@ exports.addItem = catchAsync(async (req, res, next) => {
   if (!req.body.user) req.body.user = req.user.id;
   const name = req.body.name;
   const [avg, pic] = await apiFeatures.getItemInfo(name);
-  req.body.image = pic;
+  req.body.image = req.file ? req.file.fileName : pic;
   req.body.approximatedPrice = avg;
   const categoryId = new mongoose.Types.ObjectId(req.params.categoryId);
   req.body.category = categoryId;
@@ -52,6 +79,8 @@ exports.updateItem = catchAsync(async (req, res, next) => {
 
   const currentRank = currentItem.rank;
   const currentCategoryId = currentItem.category;
+
+  if (req.file) req.body.image = req.file.fileName;
 
   if (newRank !== undefined && newRank !== currentRank) {
     const incAmount = newRank < currentRank ? 1 : -1;
