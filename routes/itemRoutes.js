@@ -9,6 +9,7 @@ router
   .post(
     body("name").notEmpty().isAlphanumeric("en-US", { ignore: " -." }),
     itemController.uploadItemPhoto,
+    itemController.resizeItemPhoto,
     itemController.addItem
   );
 
